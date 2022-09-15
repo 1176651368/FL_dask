@@ -1,0 +1,69 @@
+# This job includes coverage
+name: test-environment
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # required dependencies
+  - python=3.8
+  - packaging
+  - numpy=1.19
+  - pandas=1.2
+  # test dependencies
+  - pre-commit
+  - pytest
+  - pytest-cov
+  - pytest-rerunfailures
+  - pytest-timeout
+  - pytest-xdist
+  - moto
+  - flask
+  - fastparquet
+  - h5py
+  - pytables
+  - zarr
+  - tiledb-py
+  - pyspark
+  - tiledb>=2.5.0
+  - xarray
+  - fsspec
+  - sqlalchemy>=1.4.0
+  - pyarrow=4.0
+  - coverage
+  - jsonschema
+  # other -- IO
+  - bcolz
+  - blosc
+  - boto3
+  - botocore
+  - bokeh
+  - httpretty
+  - aiohttp
+  # Need recent version of s3fs to support newer aiobotocore versions
+  # https://github.com/dask/s3fs/issues/514
+  - s3fs>=2021.8.0
+  - cloudpickle
+  - crick
+  - cytoolz
+  - distributed
+  - ipython
+  - ipycytoscape
+  - lz4
+  - numba
+  - partd
+  - psutil
+  - requests
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - toolz
+  - python-snappy
+  - sparse
+  - cachey
+  - python-graphviz
+  - python-xxhash
+  - mmh3
+  - jinja2
+  - pip
+  - pip:
+      - git+https://github.com/dask/distributed
