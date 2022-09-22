@@ -5,6 +5,7 @@ from dask.array.core import Array
 import dask.array as da
 import numpy as np
 
+
 class EncodedNumber(object):
     BASE = 16
     """Base to use when exponentiating. Larger `BASE` means

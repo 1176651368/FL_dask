@@ -134,17 +134,10 @@ class PaillierPublicKey:
         if not isinstance(value, SUPPORT_TYPE):
             raise TypeError(f'not support type {type(value)}, we just support {SUPPORT_TYPE}')
         encoding = EncodedNumber.encode(self, value, precision)
-        print(datetime.datetime.now() - st)
         ciphertext = self.raw_encrypt(encoding.encoding, r_value=1)
-        print(datetime.datetime.now() - st)
-
         encrypted_number = EncryptedNumber(self, ciphertext, encoding.exponent)
-        print(datetime.datetime.now() - st)
-
         if r_value is None:
             encrypted_number.obfuscate()
-        print(datetime.datetime.now() - st)
-
         return encrypted_number
 
 
