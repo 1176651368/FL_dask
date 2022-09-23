@@ -1,17 +1,17 @@
 import datetime
-from FL_dask.dask import dask
+import dask
 import pandas as pd
-import FL_dask.dask.dask.array as da
-from FL_dask.encryptor.paillier.paillier import generate_paillier_keypair, toArray
+import dask.array as da
+from encryptor.paillier.paillier import generate_paillier_keypair, toArray
 import numpy as np
-from FL_dask.dask.dask.distributed import Client
+from dask.distributed import Client
 
 if __name__ == '__main__':
-    client = Client(n_workers=8, threads_per_worker=16)
+    client = Client()
     p, q = generate_paillier_keypair()
     # data = np.random.random_sample((1000,1000))
     # data = da.array(data)
-    data = da.random.random_sample((100000, 100), chunks=(500, 100))
+    data = da.random.random_sample((10000, 100), chunks=(100, 100))
     st = datetime.datetime.now()
     data2 = p.encrypt(data)
     data2.compute()

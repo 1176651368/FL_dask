@@ -17,7 +17,7 @@ plt.show()
 pred = m.predict()
 
 # plt
-data = pd.read_csv("../data/motor_hetero_guest.csv").values[:,1:]
+data = pd.read_csv("../../data/motor_hetero_guest.csv").values[:, 1:]
 y = data[-50:,0:1]
 plt.figure()
 plt.plot(range(len(pred)), pred, color='red')
