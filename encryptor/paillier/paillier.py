@@ -61,22 +61,22 @@ class PaillierPublicKey:
         return hash(self.n)
 
     def get_nude(self, plaintext):
-        if not isinstance(plaintext, int):
-            raise TypeError('Expected int type plaintext but got: %s' %
-                            type(plaintext))
 
         if self.n - self.max_int <= plaintext < self.n:
+
             # Very large plaintext, take a sneaky shortcut using inverses
             neg_plaintext = self.n - plaintext  # = abs(plaintext - nsquare)
             # avoid using gmpy2's mulmod when a * b < c
             neg_ciphertext = (self.n * neg_plaintext + 1) % self.nsquare
             # todo :may some problem
-            nude_ciphertext = invert(neg_ciphertext, self.nsquare)
+            nude_ciphertext = da.frompyfunc(invert,2,1)(neg_ciphertext, self.nsquare)
         else:
             # we chose g = n + 1, so that we can exploit the fact that
             # (n+1)^plaintext = n*plaintext + 1 mod n^2
             nude_ciphertext = (self.n * plaintext + 1) % self.nsquare
+
         return nude_ciphertext
+
 
     def raw_encrypt(self, plaintext, r_value=None):
         """Paillier encryption of a positive integer plaintext < :attr:`n`.
@@ -99,13 +99,15 @@ class PaillierPublicKey:
         """
 
         if isinstance(plaintext, Array):
-            nude_ciphertext = da.frompyfunc(self.get_nude, 1, 1)(plaintext)
+            nude_ciphertext = da.frompyfunc(self.get_nude,1,1)(plaintext)
+            # print(nude_ciphertext)
             r = r_value or self.get_random_lt_n()
             obfuscator = powmod(r, self.n, self.nsquare)
             # a * b % c
             return da.frompyfunc(mulmod, 3, 1)(nude_ciphertext, obfuscator, self.nsquare)
         elif isinstance(plaintext, (int, float)):
             nude_ciphertext = self.get_nude(plaintext)
+            # print(nude_ciphertext)
             r = r_value or self.get_random_lt_n()
             obfuscator = powmod(r, self.n, self.nsquare)
             return mulmod(nude_ciphertext, obfuscator, self.nsquare)
@@ -129,15 +131,17 @@ class PaillierPublicKey:
           EncryptedNumber: An encryption of *value*.
         """
         # If r_value is None, obfuscate in a call to .obfuscate() (below)
-        st = datetime.datetime.now()
 
         if not isinstance(value, SUPPORT_TYPE):
             raise TypeError(f'not support type {type(value)}, we just support {SUPPORT_TYPE}')
         encoding = EncodedNumber.encode(self, value, precision)
+
         ciphertext = self.raw_encrypt(encoding.encoding, r_value=1)
+
         encrypted_number = EncryptedNumber(self, ciphertext, encoding.exponent)
-        if r_value is None:
-            encrypted_number.obfuscate()
+
+        # if r_value is None:
+        #     encrypted_number.obfuscate()
         return encrypted_number
 
 
@@ -290,7 +294,12 @@ class EncryptedNumber():
             r = self.public_key.get_random_lt_n()
             r_pow_n = powmod(r, self.public_key.n, self.public_key.nsquare)
             # self.ciphertext = da.mod(self.ciphertext * r_pow_n, self.public_key.nsquare)
-            self.ciphertext = da.frompyfunc(mulmod,3,1)(self.ciphertext, r_pow_n, self.public_key.nsquare)
+            self.ciphertext = da.frompyfunc(mulmod, 3, 1)(self.ciphertext, r_pow_n, self.public_key.nsquare)
+        else:
+            r = self.public_key.get_random_lt_n()
+            r_pow_n = powmod(r, self.public_key.n, self.public_key.nsquare)
+            # self.ciphertext = da.mod(self.ciphertext * r_pow_n, self.public_key.nsquare)
+            self.ciphertext = mulmod(self.ciphertext, r_pow_n, self.public_key.nsquare)
 
     def _add_scalar(self, scalar):
         """Returns E(a + b), given self=E(a) and b.
@@ -476,6 +485,12 @@ class PaillierPrivateKey(object):
         pub_repr = repr(self.public_key)
         return "<PaillierPrivateKey for {}>".format(pub_repr)
 
+    def return_exponent(self, x):
+        try:
+            return x.exponent
+        except:
+            return None
+
     def decrypt(self, encrypted_number, Encoding=None):
         """Return the :class:`EncodedNumber` decrypted from *encrypted_number*.
 
@@ -506,18 +521,19 @@ class PaillierPrivateKey(object):
         # if self.public_key != encrypted_number.public_key:
         #     raise ValueError('encrypted_number was encrypted against a '
         #                      'different key!')
-        def t(x):
-             try:
-                 return x.exponent
-             except:
-                 return None
 
         if Encoding is None:
             Encoding = EncodedNumber
         encoded = self.raw_decrypt(encrypted_number)
-        new_exponent = da.frompyfunc(lambda x:t(x),1,1)(encrypted_number)
-        result = Encoding(self.public_key, encoded,new_exponent).decode()
+        new_exponent = da.frompyfunc(self.return_exponent, 1, 1)(encrypted_number)
+        result = Encoding(self.public_key, encoded, new_exponent).decode()
         return result
+
+    def raw_decrpyt_func(self, x, y, z):
+        try:
+            return powmod(x.ciphertext, y, z)
+        except:
+            return None
 
     def raw_decrypt(self, ciphertext):
         """Decrypt raw ciphertext and return raw plaintext.
@@ -534,22 +550,16 @@ class PaillierPrivateKey(object):
           TypeError: if ciphertext is not an int.
         """
 
-        def t(x,y,z):
-             try:
-                 return powmod(x.ciphertext, y, z)
-             except:
-                 return None
-
         decrypt_to_p = mulmod(
             self.l_function(
-                da.frompyfunc(lambda x,y,z:t(x,y,z),3,1)(ciphertext,self.p - 1,self.psquare),
+                da.frompyfunc(self.raw_decrpyt_func, 3, 1)(ciphertext, self.p - 1, self.psquare),
                 self.p),
             self.hp,
             self.p)
 
         decrypt_to_q = mulmod(
             self.l_function(
-                da.frompyfunc(lambda x,y,z:t(x,y,z),3,1)(ciphertext, self.q - 1, self.qsquare),
+                da.frompyfunc(self.raw_decrpyt_func, 3, 1)(ciphertext, self.q - 1, self.qsquare),
                 self.q),
             self.hq,
             self.q)
@@ -587,5 +597,3 @@ def toArray(data):
     r = da.frompyfunc(EncryptedNumber, 3, 1)(public_key, ciphertext, exponent)
     r.public_key, r.ciphertext, r.exponent = public_key, ciphertext, exponent
     return r
-
-

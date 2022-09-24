@@ -100,7 +100,10 @@ class EncodedNumber(object):
                     bin_lsb_exponent = bin_flt_exponent - cls.FLOAT_MANTISSA_BITS
                     prec_exponent = da.floor(bin_lsb_exponent / cls.LOG2_BASE)
                 else:
-                    raise ValueError()
+                    scalar = scalar.astype(float)
+                    bin_flt_exponent = da.frexp(scalar)[1]
+                    bin_lsb_exponent = bin_flt_exponent - cls.FLOAT_MANTISSA_BITS
+                    prec_exponent = da.floor(bin_lsb_exponent / cls.LOG2_BASE)
 
             if isinstance(scalar,np.ndarray):
                 if np.issubdtype(scalar.dtype, np.int16) or np.issubdtype(scalar.dtype, np.int32) \
@@ -139,15 +142,15 @@ class EncodedNumber(object):
             return cls(public_key, int_rep % public_key.n, exponent)
 
         elif isinstance(scalar, Array):
-
-            int_rep = (scalar * da.power(cls.BASE, -exponent))
-            exponent = da.frompyfunc(int,1,1)(exponent)
-            new_int_rep = da.mod(int_rep, public_key.n)
+            # exponent = da.frompyfunc(int,1,1)(exponent)
+            exponent = exponent.astype(dtype=int)
+            int_rep = (scalar * pow(cls.BASE, -exponent)).astype(dtype=int)
+            new_int_rep = (int_rep % public_key.n)
             new_int_rep = da.frompyfunc(int,1,1)(new_int_rep)
             return cls(public_key, new_int_rep, exponent)
 
     def decode(self):
-        return da.frompyfunc(lambda x,y,z:self.decode_one(x,y,z),3,1)(self.encoding,self.exponent,self.public_key)
+        return da.frompyfunc(self.decode_one,3,1)(self.encoding,self.exponent,self.public_key)
 
     def decode_one(self,encoding,exponent,public_key):
         """Decode plaintext and return the result.

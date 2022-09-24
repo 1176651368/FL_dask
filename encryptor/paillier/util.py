@@ -94,6 +94,7 @@ def invert(a, b):
     """
     if HAVE_GMP:
         s = int(gmpy2.invert(a, b))
+
         # according to documentation, gmpy2.invert might return 0 on
         # non-invertible element, although it seems to actually raise an
         # exception; for consistency, we always raise the exception
