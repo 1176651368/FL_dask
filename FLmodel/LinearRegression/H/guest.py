@@ -34,7 +34,7 @@ class LRGuest(LRBase):
         assert x.shape[0] == y.shape[0], 'x.shape != y.shape, check your data!'
 
         self.init_weight(x.shape)
-        self.public_key = self.connect.get('arbiter')
+        self.public_key,self.private_key = self.connect.get('arbiter')
         setattr(self, 'x', x)
         setattr(self, 'y', y)
         for i in range(epoch):

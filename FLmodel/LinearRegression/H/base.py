@@ -1,5 +1,5 @@
 import numpy as np
-from .tools import ConnectLocal
+from communication.tools import ConnectLocal
 import random
 import dask.array as da
 
@@ -44,6 +44,7 @@ class LRBase(object):
         grad_noise = self.connect.get('arbiter')
         # Gradient noise removal
         grad = grad_noise - self.noise
+
         grad = da.pad(grad, pad_width=((0, 0), (0, self.x.shape[1] - 1)), mode='edge')
         # update weight and bias
         self.weight = self.weight - (self.lr * 2 * (grad * self.x).mean(axis=0)).reshape((-1, 1))
@@ -67,3 +68,7 @@ class LRBase(object):
     def predict(self, x):
         setattr(self, 'x', x)
         self.connect.push(self._get_local_r(), 'arbiter')
+
+    def compute(self):
+        self.weight = self.weight.compute()
+        self.bias = self.bias.compute()

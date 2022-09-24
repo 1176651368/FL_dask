@@ -18,7 +18,7 @@ class ConnectLocal(object):
         """
         file_name = f"./tmp/{role}-{self.role}.pkl"
         while not os.path.exists(file_name):
-            time.sleep(0.5)
+            time.sleep(1)
         data = pickle.load(open(file_name, 'rb'))
         os.remove(file_name)
         return data
@@ -31,5 +31,5 @@ class ConnectLocal(object):
         """
         file_name = f"./tmp/{self.role}-{role}.pkl"
         while os.path.exists(file_name):
-            time.sleep(0.5)
+            time.sleep(1)
         pickle.dump(obj=data, file=open(file_name, 'wb'))

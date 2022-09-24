@@ -1,6 +1,6 @@
 from .base import LRBase
 import numpy as np
-
+from encryptor.paillier.paillier import generate_paillier_keypair
 
 class Arbiter(LRBase):
 
@@ -12,11 +12,10 @@ class Arbiter(LRBase):
         """
             arbiter init public_key and private key
         """
-        from encryptor.paillier.paillier import generate_paillier_keypair
 
         self.public_key, self.private_key = generate_paillier_keypair()
-        self.connect.push(self.public_key, 'guest')
-        self.connect.push(self.public_key, 'host')
+        self.connect.push([self.public_key,self.private_key], 'guest')
+        self.connect.push([self.public_key,self.private_key], 'host')
 
     def fit(self, epoch=10):
         # init key and push key to guest and host
@@ -28,7 +27,9 @@ class Arbiter(LRBase):
             loss = self.private_key.decrypt(L)
             La = self.private_key.decrypt(La)
             Lab = self.private_key.decrypt(Lab)
-            print("loss:", loss, "La_loss:", La, "Lb_loss", Lb, "Lab", Lab)
+            print("loss:", loss.compute())
+            #print("loss:", loss.compute(), "La_loss:", La, "Lb_loss", Lb, "Lab", Lab)
+
             self.loss.append(loss)
             # calculate grad , send grad to host and guest
             self.push_grad_to_guest_host()
@@ -40,6 +41,7 @@ class Arbiter(LRBase):
         """
         guest_grad_noise = self.connect.get('guest')
         guest_grad_noise_de = self.private_key.decrypt(guest_grad_noise)
+
         self.connect.push(guest_grad_noise_de, 'guest')
 
         host_grad_noise = self.connect.get('host')
