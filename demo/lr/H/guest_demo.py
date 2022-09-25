@@ -6,7 +6,7 @@ import pandas as pd
 if __name__ == '__main__':
     Client()
     data = pd.read_csv("../../data/motor_hetero_guest.csv").values[:, 1:]
-    epoch = 3
+    epoch = 5
     Guest = LRGuest()
     x = data[:, 1:]
     y = data[:, 0:1]

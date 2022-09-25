@@ -18,7 +18,7 @@ class LRGuest(LRBase):
         Lab = 2 * (y_host * (y_guest - self.y)).sum() / self.x.shape[0]
         L = La + Lb + Lab
 
-        self.connect.push([L, La, Lb, Lab], 'arbiter')
+        self.connect.push(L, 'arbiter')
 
     def forward_step_1(self):
         [y_host, y_host_2] = self.connect.get(role='host')

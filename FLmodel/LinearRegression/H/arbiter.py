@@ -23,10 +23,8 @@ class Arbiter(LRBase):
         print("push public key is success")
         for i in range(epoch):
             # get loss from guest and decrypt
-            [L, La, Lb, Lab] = self.connect.get('guest')
-            loss = self.private_key.decrypt(L)
-            La = self.private_key.decrypt(La)
-            Lab = self.private_key.decrypt(Lab)
+            L = self.connect.get('guest')
+            loss = self.private_key.decrypt(L).compute()
             print("loss:", loss)
             #print("loss:", loss.compute(), "La_loss:", La, "Lb_loss", Lb, "Lab", Lab)
 
