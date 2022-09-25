@@ -10,6 +10,7 @@ class LRGuest(LRBase):
         self.db = None
 
     def _compute_loss(self, y_host, y_host_2, y_guest):
+
         # La = y_host**2
         La = y_host_2.sum() / self.x.shape[0]
         # Lb = (y_guest-y)**2
@@ -17,7 +18,6 @@ class LRGuest(LRBase):
         # lab = y_host * (y_guest - y)
         Lab = 2 * (y_host * (y_guest - self.y)).sum() / self.x.shape[0]
         L = La + Lb + Lab
-
         self.connect.push(L, 'arbiter')
 
     def forward_step_1(self):
@@ -28,6 +28,7 @@ class LRGuest(LRBase):
 
         # ya + yb - y
         self.d = y_host + y_guest - self.y
+
         self.connect.push(self.d, 'host')
 
         self._compute_loss(y_host, y_host_2, y_guest)
@@ -44,6 +45,7 @@ class LRGuest(LRBase):
             self.forward_step_2()
             self.backward()
             print(datetime.datetime.now() - st)
-        self.compute()
+            print("**")
+        #self.compute()
 
 

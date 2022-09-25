@@ -29,4 +29,4 @@ class LRHost(LRBase):
             self.forward_step_2()
             self.backward()
 
-        self.compute()
+        # self.compute()

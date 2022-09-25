@@ -55,7 +55,7 @@ class LRBase(object):
         :param shape: data shape
         :return:
         """
-        self.weight = da.random.random_sample((shape[1], 1))
+        self.weight = da.random.random_sample((shape[1], 1))/shape[1]*10
         self.bias = da.random.random_sample((1, 1))
         print(self)
 

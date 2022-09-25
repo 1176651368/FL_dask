@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from dask.distributed import Client
 if __name__ == '__main__':
     Client()
-    epoch = 5
+    epoch = 10
     m = Arbiter()
     m.fit(epoch=epoch)
 

@@ -24,9 +24,8 @@ class Arbiter(LRBase):
         for i in range(epoch):
             # get loss from guest and decrypt
             L = self.connect.get('guest')
-            loss = self.private_key.decrypt(L).compute()
+            loss = self.private_key.decrypt(L)
             print("loss:", loss)
-            #print("loss:", loss.compute(), "La_loss:", La, "Lb_loss", Lb, "Lab", Lab)
 
             self.loss.append(loss)
             # calculate grad , send grad to host and guest
