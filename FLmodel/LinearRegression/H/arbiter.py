@@ -14,8 +14,8 @@ class Arbiter(LRBase):
         """
 
         self.public_key, self.private_key = generate_paillier_keypair()
-        self.connect.push([self.public_key,self.private_key], 'guest')
-        self.connect.push([self.public_key,self.private_key], 'host')
+        self.connect.push(self.public_key, 'guest')
+        self.connect.push(self.public_key, 'host')
 
     def fit(self, epoch=10):
         # init key and push key to guest and host
@@ -27,7 +27,7 @@ class Arbiter(LRBase):
             loss = self.private_key.decrypt(L)
             La = self.private_key.decrypt(La)
             Lab = self.private_key.decrypt(Lab)
-            print("loss:", loss.compute())
+            print("loss:", loss)
             #print("loss:", loss.compute(), "La_loss:", La, "Lb_loss", Lb, "Lab", Lab)
 
             self.loss.append(loss)
@@ -53,3 +53,4 @@ class Arbiter(LRBase):
         pred_host = self.connect.get('host')
         y = pred_guest + pred_host
         return y
+

@@ -1,3 +1,5 @@
+import datetime
+
 from .base import LRBase
 
 
@@ -31,16 +33,17 @@ class LRGuest(LRBase):
         self._compute_loss(y_host, y_host_2, y_guest)
 
     def fit(self, x, y, epoch=10):
-        assert x.shape[0] == y.shape[0], 'x.shape != y.shape, check your data!'
 
         self.init_weight(x.shape)
-        self.public_key,self.private_key = self.connect.get('arbiter')
+        self.public_key = self.connect.get('arbiter')
         setattr(self, 'x', x)
         setattr(self, 'y', y)
         for i in range(epoch):
+            st = datetime.datetime.now()
             self.forward_step_1()
             self.forward_step_2()
             self.backward()
-
+            print(datetime.datetime.now() - st)
+        self.compute()
 
 

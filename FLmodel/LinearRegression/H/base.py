@@ -70,5 +70,5 @@ class LRBase(object):
         self.connect.push(self._get_local_r(), 'arbiter')
 
     def compute(self):
-        self.weight = self.weight.compute()
-        self.bias = self.bias.compute()
+        self.weight.compute()
+        self.bias.compute()

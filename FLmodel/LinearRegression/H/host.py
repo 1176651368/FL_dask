@@ -21,7 +21,7 @@ class LRHost(LRBase):
 
     def fit(self, x, epoch=10):
         self.init_weight(x.shape)
-        self.public_key,self.private_key = self.connect.get('arbiter')
+        self.public_key= self.connect.get('arbiter')
         setattr(self, 'x', x)
         for i in range(epoch):
             print(i)
@@ -29,3 +29,4 @@ class LRHost(LRBase):
             self.forward_step_2()
             self.backward()
 
+        self.compute()
